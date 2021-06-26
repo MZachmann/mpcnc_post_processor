@@ -31,7 +31,7 @@ var eFirmware = {
     }
   };
 
-var fw =  eFirmware.MARLIN; 
+var fw =  eFirmware.REPRAP; 
 
 var eComment = {
     Off: 0,
@@ -73,15 +73,15 @@ var eCoolant = {
 // user-defined properties
 properties = {
   job0_SelectedFirmware : fw,            // Firmware to use in special cases
-  job1_SetOriginOnStart: true,           // Set current position as 0,0,0 on start (G92)
-  job2_ManualSpindlePowerControl: true,  // Spindle motor is controlled by manual switch 
+  job1_SetOriginOnStart: false,           // Set current position as 0,0,0 on start (G92)
+  job2_ManualSpindlePowerControl: false,  // Spindle motor is controlled by manual switch 
   job3_CommentLevel: eComment.Info,      // The level of comments included 
   job4_UseArcs: true,                    // Produce G2/G3 for arcs
   job5_SequenceNumbers: false,           // show sequence numbers
   job6_SequenceNumberStart: 10,          // first sequence number
   job7_SequenceNumberIncrement: 1,       // increment for sequence numbers
   job8_SeparateWordsWithSpace: true,     // specifies that the words should be separated with a white space 
-  job9_GoOriginOnFinish: true,           // Go X0 Y0 current Z at end
+  job9_GoOriginOnFinish: false,           // Go X0 Y0 current Z at end
 
   fr0_TravelSpeedXY: 1200,             // High speed for travel movements X & Y (mm/min)
   fr1_TravelSpeedZ: 300,               // High speed for travel movements Z (mm/min)
@@ -92,7 +92,7 @@ properties = {
   frD_MaxCutSpeedXYZ: 1000,            // Max feedrate after scaling
 
   mapD_RestoreFirstRapids: false,      // Map first G01 --> G00 
-  mapE_RestoreRapids: false,           // Map G01 --> G00 for SafeTravelsAboveZ 
+  mapE_RestoreRapids: true,           // Map G01 --> G00 for SafeTravelsAboveZ 
   mapF_SafeZ: "Retract:15",            // G01 mapped to G00 if Z is >= jobSafeZRapid
   mapG_AllowRapidZ: false,             // Allow G01 --> G00 for vertical retracts and Z descents above safe
 
@@ -122,7 +122,7 @@ properties = {
   cutter6_GrblMode: 4,                 // GRBL mode laser/plasma cutter
   cutter7_Coolant: eCoolant.Off,       // Use this coolant. F360 doesn't define a coolant for cutters
 
-  cl0_coolantA_Mode: eCoolant.Off,  // Enable issuing g-codes for control Coolant channel A 
+  cl0_coolantA_Mode: eCoolant.Mist,  // Enable issuing g-codes for control Coolant channel A 
   cl1_coolantB_Mode: eCoolant.Off,  // Use issuing g-codes for control Coolant channel B 
   cl2_coolantAOn: "M42 P6 S255",    // GCode command to turn on Coolant channel A
   cl3_coolantAOff: "M42 P6 S0",     // Gcode command to turn off Coolant channel A
@@ -449,9 +449,13 @@ propertyDefinitions = {
     title: "Duet: Laser mode", description: "GCode command to setup Duet3d laser mode", group: 9,
     type: "string", default_mm: "M452 P2 I0 R255 F200", default_in: "M452 P2 I0 R255 F200"
   },
+
 };
 
 var sequenceNumber;
+
+var SpindleOnCCW = createFormat({ prefix: "M4 P0 S", decimals: 0 });
+var SpindleOnCW = createFormat({ prefix: "M3 P0 S", decimals: 0 });
 
 // Formats
 var gFormat = createFormat({ prefix: "G", decimals: 1 });
@@ -1646,8 +1650,9 @@ function spindleOn(_spindleSpeed, _clockwise) {
         askUser("Turn ON " + speedFormat.format(_spindleSpeed) + "RPM", "Spindle", false);
       }
     } else {
-      writeComment(eComment.Important, " >>> Spindle Speed " + speedFormat.format(_spindleSpeed));
-      writeBlock(mFormat.format(_clockwise ? 3 : 4), sOutput.format(spindleSpeed));
+      writeComment(eComment.Important, " >>> New Spindle Speed " + speedFormat.format(_spindleSpeed));
+      var sson = _clockwise ? SpindleOnCW : SpindleOnCCW;
+      writeBlock(sson.format(_spindleSpeed));
     }
     this.spindleEnabled = true;
   }
