@@ -92,7 +92,7 @@ properties = {
   frD_MaxCutSpeedXYZ: 1000,            // Max feedrate after scaling
 
   mapD_RestoreFirstRapids: false,      // Map first G01 --> G00 
-  mapE_RestoreRapids: true,           // Map G01 --> G00 for SafeTravelsAboveZ 
+  mapE_RestoreRapids: false,           // Map G01 --> G00 for SafeTravelsAboveZ 
   mapF_SafeZ: "Retract:15",            // G01 mapped to G00 if Z is >= jobSafeZRapid
   mapG_AllowRapidZ: false,             // Allow G01 --> G00 for vertical retracts and Z descents above safe
 
