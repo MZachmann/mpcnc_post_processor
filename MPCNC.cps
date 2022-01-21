@@ -509,7 +509,7 @@ minimumCircularRadius = spatial(0.01, MM);
 maximumCircularRadius = spatial(1000, MM);
 minimumCircularSweep = toRad(0.01);
 maximumCircularSweep = toRad(180);
-allowHelicalMoves = false;
+allowHelicalMoves = true;
 allowedCircularPlanes = undefined;
 
 // Writes the specified block.
@@ -1652,7 +1652,7 @@ function spindleOn(_spindleSpeed, _clockwise) {
     } else {
       writeComment(eComment.Important, " >>> New Spindle Speed " + speedFormat.format(_spindleSpeed));
       var sson = _clockwise ? SpindleOnCW : SpindleOnCCW;
-      writeBlock(sson.format(_spindleSpeed));
+      writeBlock(sson.format(_spindleSpeed) + " G4 S4"); // add a 4 second delay to spindle setup
     }
     this.spindleEnabled = true;
   }
