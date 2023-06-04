@@ -1652,7 +1652,7 @@ function spindleOn(_spindleSpeed, _clockwise) {
     } else {
       writeComment(eComment.Important, " >>> New Spindle Speed " + speedFormat.format(_spindleSpeed));
       var sson = _clockwise ? SpindleOnCW : SpindleOnCCW;
-      writeBlock(sson.format(_spindleSpeed) + " G4 S4"); // add a 4 second delay to spindle setup
+      writeBlock(sson.format(1000) + ";G4 S4"); // add a 4 second delay to spindle setup and hardcode to 1000rpm
     }
     this.spindleEnabled = true;
   }
@@ -1697,7 +1697,7 @@ function circular(clockwise, cx, cy, cz, x, y, z, feed) {
   var start = getCurrentPosition();
 
   // Firmware is Grbl
-  if (fw == eFirmware.GRBL) {
+  if (fw == eFirmware.GRBL || fw == eFirmware.REPRAP) {
     if (isFullCircle()) {
         if (isHelical()) {
             linearize(tolerance);
