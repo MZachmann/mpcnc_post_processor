@@ -45,7 +45,7 @@ var eFirmware = {
     REPRAP: "RepRap",
   };
 
-var fw =  eFirmware.REPRAP; 
+var fw =  eFirmware.MARLIN;   // this is set later based on user property in onOpen
 
 // Uses indexof to determine priority of comments
 const commentLevels = ["Off", "Important", "Info","Debug"];
@@ -80,7 +80,7 @@ properties = {
       { title: eFirmware.GRBL, id: eFirmware.GRBL },
       { title: eFirmware.REPRAP, id: eFirmware.REPRAP }
     ],
-    value: eFirmware.MARLIN,
+    value: eFirmware.REPRAP,
     scope: "post"
   },
   job1_SetOriginOnStart: {
@@ -626,7 +626,7 @@ properties = {
     description: "GCode  to setup Duet3d into milling mode.",
     group      : "9 - Duet",
     type       : "string",
-    value      : "M453 P2 I0 R30000 F200",
+    value      : ";M453 P2 I0 R30000 F200",
     scope      : "post"
   },
   DuetLaserMode: {
@@ -634,7 +634,7 @@ properties = {
     description: "GCode  to setup Duet3d into laser mode.",
     group      : "9 - Duet",
     type       : "string",
-    value      : "M452 P2 I0 R255 F200",
+    value      : ";M452 P2 I0 R255 F200",
     scope      : "post"
   }
 }
