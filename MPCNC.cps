@@ -7,12 +7,14 @@ Updated to new method of handling properties
 MPCNC posts processor for milling and laser/plasma cutting.
 
 Changed Feb 2, 2025
+
+Forked from flyfisher604
 **
 */
 
 description = "v3.0 (Beta 1) MPCNC Milling/Laser for Marlin, Grbl, RepRap";
-vendor = "flyfisher604";
-vendorUrl = "https://github.com/flyfisher604/mpcnc_post_processor";
+vendor = "MZachmann";
+vendorUrl = "https://github.com/MZachmann/mpcnc_post_processor";
 longDescription = "MPCNC F360 Post processor. Supports scaling of speeds to accomidate slow Z axis. Warning: BETA review all GCode.";
 
 // Internal properties
@@ -32,7 +34,7 @@ minimumCircularRadius = spatial(0.01, MM);
 maximumCircularRadius = spatial(1000, MM);
 minimumCircularSweep = toRad(0.01);
 maximumCircularSweep = toRad(180);
-allowHelicalMoves = false;
+allowHelicalMoves = true;
 allowedCircularPlanes = undefined;
 
 machineMode = undefined; //TYPE_MILLING, TYPE_JET
@@ -43,7 +45,7 @@ var eFirmware = {
     REPRAP: "RepRap",
   };
 
-var fw =  eFirmware.MARLIN; 
+var fw =  eFirmware.REPRAP; 
 
 // Uses indexof to determine priority of comments
 const commentLevels = ["Off", "Important", "Info","Debug"];
@@ -86,7 +88,7 @@ properties = {
     description: "On start, set the current location as 0,0,0 (G92).",
     group      : "1 - Job",
     type       : "boolean",
-    value      : true,
+    value      : false,
     scope      : "post"
   },
   job2_ManualSpindlePowerControl: {
@@ -94,7 +96,7 @@ properties = {
     description: "Enable to manually turn spindle motor on/off.",
     group      : "1 - Job",
     type       : "boolean",
-    value      : true,
+    value      : false,
     scope      : "post"
   },
   job3_CommentLevel: {
@@ -156,7 +158,7 @@ properties = {
     description: "Return to X0 Y0 at gcode end, Z remains unchanged.",
     group      : "1 - Job",
     type       : "boolean",
-    value      : true,
+    value      : false,
     scope      : "post"
   },
 
@@ -165,7 +167,7 @@ properties = {
     description: "High speed for Rapid movements X & Y (mm/min).",
     group      : "2 - Feeds and Speeds",
     type       : "integer",
-    value      : 2500,
+    value      : 1200,
     scope      : "post"
   },
   fr1_TravelSpeedZ: {
@@ -444,7 +446,7 @@ properties = {
     type       : "enum",
     values: [
       { title: "Fan - M106 S{PWM}/M107", id: "106" },
-      { title: "Spindle - M3 O{PWM}/M5", id: "3" },
+      { title: "Spindle - M3 P0 O{PWM}/M5", id: "3" },
       { title: "Pin - M42 P{pin} S{PWM}", id: "42" }
     ],
     value: "106",
@@ -506,7 +508,7 @@ properties = {
       { title: eCoolant.FloodMist, id: eCoolant.FloodMist },
       { title: eCoolant.FloodThroughTool, id: eCoolant.FloodThroughTool }
     ],
-    value      : eCoolant.Off,
+    value      : eCoolant.Mist,
     scope      : "post"
   },
   cl1_coolantB_Mode: {
@@ -638,6 +640,9 @@ properties = {
 }
 
 var sequenceNumber;
+
+var SpindleOnCCW = createFormat({ prefix: "M4 P0 S", decimals: 0 });
+var SpindleOnCW = createFormat({ prefix: "M3 P0 S", decimals: 0 });
 
 // Formats
 var gFormat = createFormat({ prefix: "G", decimals: 1 });
@@ -1818,7 +1823,9 @@ function spindleOn(_spindleSpeed, _clockwise) {
     }
   } else {
     writeComment(eComment.Important, " >>> Spindle Speed " + speedFormat.format(_spindleSpeed));
-    writeBlock(mFormat.format(_clockwise ? 3 : 4), sOutput.format(spindleSpeed));
+    // writeBlock(mFormat.format(_clockwise ? 3 : 4), sOutput.format(_spindleSpeed));  // add a 4 second delay, fix to 1000 ss
+    var sson = _clockwise ? SpindleOnCW : SpindleOnCCW;
+    writeBlock(sson.format(1000) + ";G4 S4");
   }
  
   this.spindleEnabled = true;
